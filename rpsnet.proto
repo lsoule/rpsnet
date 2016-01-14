@@ -1,0 +1,54 @@
+// The definition of an RPSnet service.
+syntax = "proto3";
+
+package Rpsnet;
+
+message EmptyMessage {}
+
+message CandidateRequest {
+  string cpu_id = 1; // Identifying name of the requestor
+}
+
+message CandidateResponse {
+  string pgen_line = 1;
+  int32 rps_k = 2;  // K*2^N-1
+  int32 rps_n = 3;
+}
+
+message WorkDoneRequest {
+  // Report work done
+  string result_output = 1;
+  bool result_ok = 2;
+  int32 result_k = 3;
+  int32 result_n = 4;
+}
+
+// These error codes are used to set RPC::application_error.
+message Error {
+  enum Code {
+    NO_ERROR = 0;
+    INVALID_RESULT = 1;
+  }
+}
+
+message CandidateProgress {
+    CandidateResponse candidate = 1;
+    string llr_return = 2;
+    bool sent_out = 3;
+    int64 time_sent_out = 4;
+}
+
+message ProgressFile {
+    string pgen_line = 1;
+    repeated CandidateProgress progress = 2;
+}
+
+service RpsNet {
+  // Gets a k/n pair to work on
+  rpc GetWork(CandidateRequest) returns (CandidateResponse) {
+  }
+
+  // Returns the result of LLR
+  rpc ReportWork(WorkDoneRequest) returns (EmptyMessage) {
+  }
+}
