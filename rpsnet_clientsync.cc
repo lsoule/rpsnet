@@ -51,6 +51,7 @@ int main(int argc, char** argv) {
         string lresults;
         std::ifstream myfile("lresults.txt");
         getline (myfile, lresults);
+        printf("report work %s\n", lresults.c_str());
         client.ReportWork(lresults, cand_k, cand_n, true);
       }
     }
@@ -89,8 +90,15 @@ void RpsnetClientSync::ReportWork(const string& work_output,
   request.set_result_n(result_n);
   request.set_result_ok(isOk);
 
-  ClientContext context;
-
-  Status status =stub_->ReportWork(&context, request, &response);
+  for (int i = 0; i < 10; i++) {
+    ClientContext context;
+    printf("ReportWork, request %s\n", request.ShortDebugString().c_str());
+    Status status = stub_->ReportWork(&context, request, &response);
+    if (status.ok()) {
+      return;
+    }
+    printf("ReportWork RPC failed, code %d, msg %s\n", status.error_code(), status.error_message().c_str());
+    sleep(10);
+  }
 }
 }  // namespace Rpsnet
